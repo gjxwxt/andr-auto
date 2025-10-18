@@ -50,6 +50,8 @@ jobs:
 
       - name: Setup Capacitor
         run: |
+          echo "PNPM_HOME=$(pnpm store path)/../global" >> $GITHUB_ENV
+          echo "$PNPM_HOME" >> $GITHUB_PATH
           pnpm install -D typescript
           pnpm install -g @capacitor/cli
           npx cap sync
