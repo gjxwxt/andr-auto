@@ -50,8 +50,8 @@ jobs:
 
       - name: Setup Capacitor
         run: |
-          npm install -D typescript
-          npm install -g @capacitor/cli
+          pnpm install -D typescript
+          pnpm install -g @capacitor/cli
           npx cap sync
 
       - name: Build Android APK
