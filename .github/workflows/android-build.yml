@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install typescript
+        run: pnpm install -D typescript
+
       - name: Build web app
         run: pnpm build
 
@@ -48,18 +51,35 @@ jobs:
           build-tools: 33.0.0
           ndk-version: 25.1.8937393
 
-      - name: Setup Capacitor
+      - name: Setup pnpm and Install Capacitor CLI
+        shell: bash
         run: |
-          # 1. 设置 PNPM_HOME 环境变量
-          # (pnpm store path) 找到缓存路径，然后推断出全局 bin 目录
-          # 并将其添加到 GitHub Actions 的环境变量中，供后续步骤使用。
-          echo "PNPM_HOME=$(pnpm store path)/../global" >> $GITHUB_ENV
+          # 1. 运行 pnpm setup。这会尝试配置全局 bin 目录。
+          # 尽管它可能不会立即在当前 shell 中生效，但能确保目录结构正确。
+          pnpm setup
 
-          # 2. 将 PNPM_HOME 路径添加到系统的 PATH 环境变量中
-          # 这样 npx cap sync 就能找到全局安装的 @capacitor/cli
-          echo "$(pnpm store path)/../global" >> $GITHUB_PATH
-          pnpm install -D typescript
+          # 2. 查找 pnpm 的全局 bin 目录，并将其添加到 GITHUB_PATH
+          # `pnpm root -g` 返回全局 node_modules 目录。全局 bin 目录位于其父目录中。
+          GLOBAL_BIN_DIR=$(pnpm root -g | sed 's/\(.*\)\/node_modules/\1/')
+
+          # 检查 bin 目录是否存在（通常是 pnpm setup 创建的）
+          if [ -d "$GLOBAL_BIN_DIR" ]; then
+            # 将全局 bin 目录添加到 PATH 中，供后续步骤使用
+            echo "$GLOBAL_BIN_DIR" >> $GITHUB_PATH
+            echo "PNPM_HOME=$GLOBAL_BIN_DIR" >> $GITHUB_ENV
+            echo "成功设置 PNPM 全局路径: $GLOBAL_BIN_DIR"
+          else
+            echo "警告：未能找到预期的 PNPM 全局 bin 目录。"
+            # 如果上一步失败，再次尝试手动设置常用路径作为备用方案
+            echo "PNPM_HOME=$(pnpm store path)/../global" >> $GITHUB_ENV
+            echo "$(pnpm store path)/../global" >> $GITHUB_PATH
+          fi
+
+          # 3. 安装 @capacitor/cli
+          # 此时，由于我们设置了 $GITHUB_PATH，@capacitor/cli 应该能成功安装和使用
           pnpm install -g @capacitor/cli
+
+          # 4. 执行同步
           npx cap sync
 
       - name: Build Android APK
