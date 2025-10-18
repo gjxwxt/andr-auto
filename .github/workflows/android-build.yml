@@ -50,8 +50,14 @@ jobs:
 
       - name: Setup Capacitor
         run: |
+          # 1. 设置 PNPM_HOME 环境变量
+          # (pnpm store path) 找到缓存路径，然后推断出全局 bin 目录
+          # 并将其添加到 GitHub Actions 的环境变量中，供后续步骤使用。
           echo "PNPM_HOME=$(pnpm store path)/../global" >> $GITHUB_ENV
-          echo "$PNPM_HOME" >> $GITHUB_PATH
+
+          # 2. 将 PNPM_HOME 路径添加到系统的 PATH 环境变量中
+          # 这样 npx cap sync 就能找到全局安装的 @capacitor/cli
+          echo "$(pnpm store path)/../global" >> $GITHUB_PATH
           pnpm install -D typescript
           pnpm install -g @capacitor/cli
           npx cap sync
