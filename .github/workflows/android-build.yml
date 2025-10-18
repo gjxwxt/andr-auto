@@ -54,29 +54,27 @@ jobs:
       - name: Setup pnpm and Install Capacitor CLI
         shell: bash
         run: |
-          # 1. 运行 pnpm setup。这会尝试配置全局 bin 目录。
-          # 尽管它可能不会立即在当前 shell 中生效，但能确保目录结构正确。
+          # 1. 运行 pnpm setup（确保目录被创建）
           pnpm setup
 
-          # 2. 查找 pnpm 的全局 bin 目录，并将其添加到 GITHUB_PATH
-          # `pnpm root -g` 返回全局 node_modules 目录。全局 bin 目录位于其父目录中。
-          GLOBAL_BIN_DIR=$(pnpm root -g | sed 's/\(.*\)\/node_modules/\1/')
+          # 2. 强制设置正确的 PNPM_HOME 路径
+          # 我们根据 pnpm 的标准输出（日志中已打印）来确定这个路径。
+          # 并将其添加到 GITHUB_PATH 和 GITHUB_ENV，使其在后续步骤中生效。
+          # 注意：这里的路径是 "/home/runner/.local/share/pnpm"，必须精确匹配 runner 的环境。
+          PNPM_HOME_PATH="/home/runner/.local/share/pnpm"
 
-          # 检查 bin 目录是否存在（通常是 pnpm setup 创建的）
-          if [ -d "$GLOBAL_BIN_DIR" ]; then
-            # 将全局 bin 目录添加到 PATH 中，供后续步骤使用
-            echo "$GLOBAL_BIN_DIR" >> $GITHUB_PATH
-            echo "PNPM_HOME=$GLOBAL_BIN_DIR" >> $GITHUB_ENV
-            echo "成功设置 PNPM 全局路径: $GLOBAL_BIN_DIR"
-          else
-            echo "警告：未能找到预期的 PNPM 全局 bin 目录。"
-            # 如果上一步失败，再次尝试手动设置常用路径作为备用方案
-            echo "PNPM_HOME=$(pnpm store path)/../global" >> $GITHUB_ENV
-            echo "$(pnpm store path)/../global" >> $GITHUB_PATH
-          fi
+          # 将路径添加到 GITHUB_PATH，供后续 steps 使用
+          echo "$PNPM_HOME_PATH" >> $GITHUB_PATH
+
+          # 设置 PNPM_HOME 环境变量
+          echo "PNPM_HOME=$PNPM_HOME_PATH" >> $GITHUB_ENV
+
+          # 打印确认信息 (可选)
+          echo "PNPM_HOME 已设置: $PNPM_HOME_PATH"
+          echo "已将该路径添加到 PATH 中"
 
           # 3. 安装 @capacitor/cli
-          # 此时，由于我们设置了 $GITHUB_PATH，@capacitor/cli 应该能成功安装和使用
+          # 此时，PATH 应该已更新，全局安装的包可以正常安装和使用。
           pnpm install -g @capacitor/cli
 
           # 4. 执行同步
