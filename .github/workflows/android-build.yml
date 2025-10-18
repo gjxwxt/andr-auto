@@ -50,6 +50,7 @@ jobs:
 
       - name: Setup Capacitor
         run: |
+          npm install -D typescript
           npm install -g @capacitor/cli
           npx cap sync
 
