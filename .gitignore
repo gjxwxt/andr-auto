@@ -1,0 +1,38 @@
+# 依赖包
+node_modules/
+.pnpm-store/
+
+# 构建输出
+dist/
+build/
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 缓存
+.cache/
+.parcel-cache/
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Android构建文件（重要！）
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+
+# 临时文件
+*.tmp
+*.temp

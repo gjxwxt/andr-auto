@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">自动化插件设计</string>
+    <string name="title_activity_main">自动化插件设计</string>
+    <string name="accessibility_service_description">自动化插件无障碍服务，用于执行自动化操作</string>
+</resources>
